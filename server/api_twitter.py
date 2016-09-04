@@ -105,16 +105,17 @@ def init_data(user_id, api):
 
     users = find_1hop_user(user_id, api)
     coll_user = db_mongo.get_doc("user_1hop", db)
-    db_mongo.insert(users,coll_user)
+    db_mongo.update_user(users,coll_user)
 
     relationship_1hop = find_1hop_relationship_incoming(user_id, api)
     coll_relationship= db_mongo.get_doc("relationship_1hop", db)
-    db_mongo.insert(relationship_1hop,coll_relationship)
+    db_mongo.update_relatioship(relationship_1hop,coll_relationship)
 
 
 if __name__ == "__main__":
     api = init_twitter()
     while True:
         init_data("AndySgd1995", api)
+        print 1
         fun_logging.set_log("finished once data crawling", 0)
         time.sleep(24 * 60 * 60)

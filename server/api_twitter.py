@@ -69,6 +69,7 @@ def find_1hop_user(user_id, api):
     followers_id = api.followers_ids(user_id)
     users = []
     fun_logging.set_log("followers' id acquisition success,get" + str(len(followers_id)) + "follower id", 0)
+    print "followers' id acquisition success,get" + str(len(followers_id)) + "follower id"
     index = 0
     for id in followers_id:
         print index
@@ -77,10 +78,12 @@ def find_1hop_user(user_id, api):
             users.append(get_user(api,id)._json)
         except tweepy.RateLimitError:
             fun_logging.set_log("RateLimitError please waiting 15 minutes", 3)
+            print "RateLimitError please waiting 15 minutes"
             time.sleep(15 * 60)
             fun_logging.set_log("Re start getting data", 0)
+            print "Re start getting data"
         except tweepy.TweepError:
-            print
+            print "Can't get this data,user id is" + str(id)
             fun_logging.set_log("Can't get this data,user id is" + str(id),3)
             continue
     return users
@@ -110,6 +113,8 @@ def init_data(user_id, api):
     relationship_1hop = find_1hop_relationship_incoming(user_id, api)
     coll_relationship= db_mongo.get_doc("relationship_1hop", db)
     db_mongo.update_relatioship(relationship_1hop,coll_relationship)
+
+    db_mongo.ensure_consistency("relationship_1hop", "user_1hop", db)
 
 
 if __name__ == "__main__":

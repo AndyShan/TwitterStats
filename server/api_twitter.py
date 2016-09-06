@@ -97,10 +97,55 @@ def find_1hop_relationship_incoming(user_id, api):
     :return: relationship
     """
     relationship = []
-    relationship_incoming = api.followers_ids(user_id)
-    for r in relationship_incoming:
-        relationship.append({"id":r})
+    try:
+        relationship_incoming = api.followers_ids(user_id)
+        for r in relationship_incoming:
+            relationship.append({"id":r})
+    except tweepy.RateLimitError:
+        fun_logging.set_log("RateLimitError please waiting 15 minutes", 3)
+        print "RateLimitError please waiting 15 minutes"
+        time.sleep(15 * 60)
+        fun_logging.set_log("Re start getting data", 0)
+        print "Re start getting data"
+
     return relationship
+
+
+def find_2hop_relationship_incoming(user_ids, api):
+    """
+    Gets the 1hop relationship for the specified 1hop users
+    :param user_ids: 1hop users
+    :param api:
+    """
+    relationship = []
+    index = 0
+    for u in user_ids:
+        print index
+        index += 1
+        try:
+            ids = api.followers_ids(u['id'])
+            print len(ids)
+            lim = 0
+            for i in ids:
+                if (lim >100):
+                    break
+                lim += 1
+                relationship.append({"id":i,"edge":[u['id'],i]})
+            lim = 0
+            db = db_mongo.init_db()
+            coll = db_mongo.get_doc("relationship_2hop", db)
+            db_mongo.update_relationship_2hop(relationship, coll)
+            db_mongo.ensure_single(db)
+            relationship = []
+        except tweepy.RateLimitError:
+            fun_logging.set_log("RateLimitError please waiting 15 minutes", 3)
+            print "RateLimitError please waiting 15 minutes"
+            time.sleep(15 * 60)
+            fun_logging.set_log("Re start getting data", 0)
+            print "Re start getting data"
+        except tweepy.TweepError:
+            print "TweepError"
+            continue
 
 
 def init_data(user_id, api):
@@ -114,13 +159,19 @@ def init_data(user_id, api):
     coll_relationship= db_mongo.get_doc("relationship_1hop", db)
     db_mongo.update_relatioship(relationship_1hop,coll_relationship)
 
+    print "ensure"
     db_mongo.ensure_consistency("relationship_1hop", "user_1hop", db)
 
+    coll_relationship1_find = db_mongo.get_doc("relationship_1hop", db).find()
+    find_2hop_relationship_incoming(coll_relationship1_find, api)
 
 if __name__ == "__main__":
     api = init_twitter()
-    while True:
-        init_data("AndySgd1995", api)
-        print 1
-        fun_logging.set_log("finished once data crawling", 0)
-        time.sleep(24 * 60 * 60)
+    db = db_mongo.init_db()
+    # while True:
+    #     init_data("AndySgd1995", api)
+    #     print 1
+    #     fun_logging.set_log("finished once data crawling", 0)
+    #     time.sleep(24 * 60 * 60)
+    coll_relationship1_find = db_mongo.get_doc("relationship_1hop", db).find()
+    find_2hop_relationship_incoming(coll_relationship1_find, api)

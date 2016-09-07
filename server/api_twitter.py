@@ -134,7 +134,7 @@ def find_2hop_relationship_incoming(user_ids, api):
             lim = 0
             db = db_mongo.init_db()
             coll = db_mongo.get_doc("relationship_2hop", db)
-            db_mongo.update_relationship_2hop(relationship, coll)
+            db_mongo.update_relatioship(relationship, coll)
             db_mongo.ensure_single(db)
             relationship = []
         except tweepy.RateLimitError:

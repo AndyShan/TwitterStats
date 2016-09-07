@@ -26,13 +26,6 @@ def update_user(users, coll):
 
 def update_relatioship(relationships, coll):
     for r in relationships:
-        result = coll.find_one(r)
-        if result == None:
-            insert(r,coll)
-
-
-def update_relationship_2hop(relationship, coll):
-    for r in relationship:
         result = coll.find_one({"id":r['id']})
         if result == None:
             insert(r, coll)

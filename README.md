@@ -6,7 +6,7 @@
  - mongodb
  - sigma.js
 
-## model
+## MODEL
 
  - tf-idf
  - LR

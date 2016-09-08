@@ -58,5 +58,8 @@ if __name__ == "__main__":
     #     if not coll2.find_one(i['id']):
     #         print i\
     # print coll3.count()
-    coll2 = get_doc("relationship_2hop",db)
-    print coll2.count()
+    # coll = get_doc("user_1hop", db).find()
+    # for i in range(10):
+    #     print coll[i]['id']
+    coll = get_doc("friends_training_set", db).find()
+    print coll.count()
